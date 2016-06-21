@@ -4,6 +4,7 @@ import numpy as np
 from numpy import float32, int32, uint8, dtype
 import sys
 from PIL import Image
+import glob
 
 # Relative path to where PyGreentea resides
 pygt_path = '../../PyGreentea'
@@ -18,25 +19,46 @@ import math
 # Load PyGreentea
 import PyGreentea as pygt
 
-# Load the datasets - hdf5
+'''
+Input option 1
+Load the datasets - hdf5
+'''
 hdf5_raw_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/img_normalized.h5'
 hdf5_gt_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_seg.h5'
 # hdf5_aff_file - affinity ground truth. if you train with euclid, ignore this one
 # hdf5_aff_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_aff.h5'
 
-
+# read hdf5 files
 hdf5_raw = h5py.File(hdf5_raw_file, 'r')
 hdf5_gt = h5py.File(hdf5_gt_file, 'r')
 # ignore for eucledian distance
 # hdf5_aff = h5py.File(hdf5_aff_file, 'r')
 
+# from this point, the data is in numpy arrays
 hdf5_raw_ds = pygt.normalize(np.asarray(hdf5_raw[hdf5_raw.keys()[0]]).astype(float32), -1, 1)
 hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
 # ignore for eucledian distance
 # hdf5_aff_ds = np.asarray(hdf5_aff[hdf5_aff.keys()[0]]).astype(float32)
+###############################################################
+'''
+Input option 2
+Load the datasets - individual tiff files in a directory
+'''
+rawInputDir = '/home/thanuja/projects/data/toyData/set8/raw';
+labelInputDir = ''
 
-# Load the datasets - tiff
-# paths
+rawImagePath = glob.glob(rawInputDir+'/*.tif')
+labelImagePath = glob.glob(labelInputDir+'/*.tif')
+numFiles = len(rawImagePath)
+
+hdf5_raw_ds = numpy.array( [numpy.array(Image.open(rawImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
+hdf5_gt_ds = numpy.array( [numpy.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
+###############################################################
+'''
+Input option 3
+Load the datasets - multipage tiff containing all the images
+'''
+'''
 tiff_raw_dir = ''
 tiff_gt_dir = ''
 # ignore for eucledian distance
@@ -46,7 +68,9 @@ tiff_raw = Image.open(tiff_raw_file)
 tiff_gt = Image.open(tiff_gt_file)
 tiff_aff = Image.open(tiff_aff_file)
 # read into np arrays
-tiff
+# tiff
+'''
+###############################################################
 
 datasets = []
 for i in range(0,hdf5_raw_ds.shape[1]):
