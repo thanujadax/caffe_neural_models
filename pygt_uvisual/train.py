@@ -23,6 +23,7 @@ import PyGreentea as pygt
 Input option 1
 Load the datasets - hdf5
 '''
+'''
 hdf5_raw_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/img_normalized.h5'
 hdf5_gt_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_seg.h5'
 # hdf5_aff_file - affinity ground truth. if you train with euclid, ignore this one
@@ -39,20 +40,21 @@ hdf5_raw_ds = pygt.normalize(np.asarray(hdf5_raw[hdf5_raw.keys()[0]]).astype(flo
 hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
 # ignore for eucledian distance
 # hdf5_aff_ds = np.asarray(hdf5_aff[hdf5_aff.keys()[0]]).astype(float32)
+'''
 ###############################################################
 '''
 Input option 2
 Load the datasets - individual tiff files in a directory
 '''
-rawInputDir = '/home/thanuja/projects/data/toyData/set8/raw';
-labelInputDir = ''
+rawInputDir = '/home/thanuja/projects/data/dataset_01/train/raw';
+labelInputDir = '/home/thanuja/projects/data/dataset_01/train/labels'
 
 rawImagePath = glob.glob(rawInputDir+'/*.tif')
-labelImagePath = glob.glob(labelInputDir+'/*.tif')
+labelImagePath = glob.glob(labelInputDir+'/*.png')
 numFiles = len(rawImagePath)
 
-hdf5_raw_ds = numpy.array( [numpy.array(Image.open(rawImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
-hdf5_gt_ds = numpy.array( [numpy.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
+hdf5_raw_ds = np.array( [np.array(Image.open(rawImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
+hdf5_gt_ds = np.array( [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
 ###############################################################
 '''
 Input option 3
