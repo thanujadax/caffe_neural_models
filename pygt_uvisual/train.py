@@ -57,9 +57,11 @@ print("rawImagePath: {0}".format(rawImagePath))
 labelImagePath = sorted(glob.glob(labelInputDir+'/*.png'))
 numFiles = len(rawImagePath)
 
-hdf5_raw_ds = np.array( [np.array(Image.open(rawImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
-hdf5_gt_ds = np.array( [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)] )
-
+raw_ds = [np.expand_dims(pygt.normalize(np.array(Image.open(rawImagePath[i]).convert('L'), 'f')),0) for i in range(0,numFiles)]
+gt_ds = [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)]
+gt_ds_scaled = [np.expand_dims(np.floor(label/31),0) for label in gt_ds]
+print(gt_ds_scaled[0].shape)
+print(raw_ds[0].shape)
 
 '''
 print("os.listdir(rawInputDir):{0}".format(os.listdir(rawInputDir)))
@@ -78,8 +80,8 @@ print(hdf5_raw_ds.shape, hdf5_raw_ds.dtype)
 print("Stop william's log message.")
 '''
 
-print("hdf5_raw_ds.shape = {0}".format(hdf5_raw_ds.shape))
-print("hdf5_gt_ds.shape = {0}".format(hdf5_gt_ds.shape))
+#print("raw_ds.shape = {0}".format(raw_ds.shape))
+#print("hdf5_gt_ds.shape = {0}".format(gt_ds.shape))
 
 ###############################################################
 '''
@@ -114,13 +116,10 @@ for i in range(hdf5_raw_ds.shape[0]):
 '''
 
 datasets = []
-for i in range(0,hdf5_raw_ds.shape[1]):
+for i in range(0,len(raw_ds)):
     dataset = {}
-    dataset['nhood'] = pygt.malis.mknhood2d()
-    dataset['data'] = hdf5_raw_ds[None, i, :]
-    components_array = hdf5_gt_ds[i, :]
-    dataset['label'] = pygt.malis.seg_to_affgraph(components_array, dataset['nhood'])
-    dataset['components'] = components_array[None, :]
+    dataset['data'] = raw_ds[i]
+    dataset['label'] = gt_ds_scaled[i]
     datasets += [dataset]
 
 #test_dataset = {}
@@ -129,13 +128,10 @@ for i in range(0,hdf5_raw_ds.shape[1]):
 
 # Set train options
 class TrainOptions:
-    loss_function = "euclid"
-    loss_output_file = "log/loss.log"
-    test_output_file = "log/test.log"
+    loss_function = "softmax"
+    loss_snapshot = 100
     test_interval = 4000
-    scale_error = True
-    training_method = "affinity"
-    recompute_affinity = True
+    scale_error = False
     train_device = 0
     test_device = 0
     test_net=None #'net_test.prototxt'
@@ -144,14 +140,14 @@ options = TrainOptions()
 
 # Set solver options
 solver_config = pygt.caffe.SolverParameter()
-solver_config.train_net = 'net_train_euclid.prototxt'
-solver_config.base_lr = 0.0001
+solver_config.train_net = 'net_train_softmax.prototxt'
+solver_config.base_lr = 0.00005
 solver_config.momentum = 0.99
 solver_config.weight_decay = 0.000005
 solver_config.lr_policy = 'inv'
 solver_config.gamma = 0.0001
 solver_config.power = 0.75
-solver_config.max_iter = 8000
+solver_config.max_iter = 20000
 solver_config.snapshot = 2000
 solver_config.snapshot_prefix = 'net'
 solver_config.type = 'Adam'

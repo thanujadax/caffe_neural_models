@@ -16,10 +16,11 @@ import math
 
 # Load PyGreentea
 import PyGreentea as pygt
+import glob
+from PIL import Image
 
 
-
-test_net_file = 'net_test.prototxt'
+test_net_file = 'net_test_softmax.prototxt'
 test_device = 0
 
 pygt.caffe.set_devices((test_device,))
@@ -30,29 +31,32 @@ test_net = pygt.init_testnet(test_net_file, trained_model=caffemodels[-1][1], te
 
 
 # Load the datasets
-hdf5_raw_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/img_normalized.h5'
-hdf5_gt_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_seg.h5'
-hdf5_aff_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_aff.h5'
+rawInputDir = '/home/thanuja/projects/data/dataset_01/train/raw';
+labelInputDir = '/home/thanuja/projects/data/dataset_01/train/labels'
 
-hdf5_raw = h5py.File(hdf5_raw_file, 'r')
-hdf5_gt = h5py.File(hdf5_gt_file, 'r')
-hdf5_aff = h5py.File(hdf5_aff_file, 'r')
+rawImagePath = sorted(glob.glob(rawInputDir+'/*.tif'))
+print("rawImagePath: {0}".format(rawImagePath))
+labelImagePath = sorted(glob.glob(labelInputDir+'/*.png'))
+numFiles = len(rawImagePath)
 
-hdf5_raw_ds = pygt.normalize(np.asarray(hdf5_raw[hdf5_raw.keys()[0]]).astype(float32), -1, 1)
-hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
-hdf5_aff_ds = np.asarray(hdf5_aff[hdf5_aff.keys()[0]]).astype(float32)
+raw_ds = [np.expand_dims(pygt.normalize(np.array(Image.open(rawImagePath[i]).convert('L'), 'f')),0) for i in range(0,1)]
+gt_ds = [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,1)]
+gt_ds_scaled = [np.expand_dims(np.floor(label/31),0) for label in gt_ds]
+print(gt_ds_scaled[0].shape)
+print(raw_ds[0].shape)
 
 datasets = []
-for i in range(0,1):
+for i in range(0,len(raw_ds)):
     dataset = {}
-    dataset['data'] = hdf5_raw_ds[None, i, :]
+    dataset['data'] = raw_ds[i]
+    dataset['label'] = gt_ds_scaled[i]
     datasets += [dataset]
 
 
 pred_array = pygt.process(test_net, datasets)
 
-pygt.dump_tikzgraph_maps(test_net, 'dump')
+# pygt.dump_tikzgraph_maps(test_net, 'dump')
 
 outhdf5 = h5py.File('test_out.h5', 'w')
-outdset = outhdf5.create_dataset('main', np.shape(pred_array)[1:], np.float32, data=pred_array)
+outdset = outhdf5.create_dataset('main', np.shape(pred_array), np.float32, data=pred_array)
 outhdf5.close()

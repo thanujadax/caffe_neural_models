@@ -40,7 +40,7 @@ netconf.u_netconfs[0].unet_downsampling_strategy = [[2],[2],[2],[2]]
 # netconf.u_netconfs = [netconf.u_netconfs[0],netconf.u_netconfs[0]]
 
 
-netconf.loss_function = "euclid"
+netconf.loss_function = "softmax"
 inshape,outshape,fmaps = pygt.netgen.compute_valid_io_shapes(netconf,pygt.netgen.caffe_pb2.TRAIN,[400,400],[500,500],constraints=[None,lambda x: x[0], lambda x: x[1]])
 
 
@@ -51,17 +51,17 @@ print("Index to use: %s" % index)
 netconf.input_shape = inshape[index]
 netconf.output_shape = outshape[index]
 netconf.fmap_start = 64
-netconf.fmap_output = 2
+netconf.fmap_output = 9
 
-netconf.loss_function = "euclid"
-train_net_conf_euclid, test_net_conf, tikz_train, tikz_test = pygt.netgen.create_nets(netconf)
+netconf.loss_function = "softmax"
+train_net_softmax, test_net_softmax, tikz_train, tikz_test = pygt.netgen.create_nets(netconf)
 #netconf.loss_function = "malis"
 #train_net_conf_malis, test_net_conf, train_net_tikzgraph, test_net_tikzgraph = pygt.netgen.create_nets(netconf)
 
-with open('net_train_euclid.prototxt', 'w') as f:
-    print(train_net_conf_euclid, file=f)
-with open('net_test.prototxt', 'w') as f:
-    print(test_net_conf, file=f)
+with open('net_train_softmax.prototxt', 'w') as f:
+    print(train_net_softmax, file=f)
+with open('net_test_softmax.prototxt', 'w') as f:
+    print(test_net_softmax, file=f)
     
 #with open('trainnet.tex', 'w') as f:
 #    print(train_net_tikzgraph, file=f)
