@@ -28,8 +28,33 @@ pygt.caffe.set_devices((test_device,))
 caffemodels = pygt.getCaffeModels('net');
 
 test_net = pygt.init_testnet(test_net_file, trained_model=caffemodels[-1][1], test_device=test_device)
+'''
+Input option 1
+Load the datasets - hdf5
+'''
+'''
+hdf5_raw_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/img_normalized.h5'
+hdf5_gt_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_seg.h5'
+# hdf5_aff_file - affinity ground truth. if you train with euclid, ignore this one
+# hdf5_aff_file = '../dataset_06/fibsem_medulla_7col/tstvol-520-1-h5/groundtruth_aff.h5'
 
+# read hdf5 files
+hdf5_raw = h5py.File(hdf5_raw_file, 'r')
+hdf5_gt = h5py.File(hdf5_gt_file, 'r')
+# ignore for eucledian distance
+# hdf5_aff = h5py.File(hdf5_aff_file, 'r')
 
+# from this point, the data is in numpy arrays
+hdf5_raw_ds = pygt.normalize(np.asarray(hdf5_raw[hdf5_raw.keys()[0]]).astype(float32), -1, 1)
+hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
+# ignore for eucledian distance
+# hdf5_aff_ds = np.asarray(hdf5_aff[hdf5_aff.keys()[0]]).astype(float32)
+'''
+###############################################################
+'''
+Input option 2
+Load the datasets - individual tiff files in a directory
+'''
 # Load the datasets
 rawInputDir = '/home/thanuja/projects/data/dataset_01/train/raw';
 labelInputDir = '/home/thanuja/projects/data/dataset_01/train/labels'
