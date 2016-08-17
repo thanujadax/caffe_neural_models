@@ -51,7 +51,7 @@ print("Index to use: %s" % index)
 netconf.input_shape = inshape[index]
 netconf.output_shape = outshape[index]
 netconf.fmap_start = 64
-netconf.fmap_output = 9
+netconf.fmap_output = 2
 
 netconf.loss_function = "softmax"
 train_net_softmax, test_net_softmax, tikz_train, tikz_test = pygt.netgen.create_nets(netconf)

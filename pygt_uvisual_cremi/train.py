@@ -54,6 +54,7 @@ hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
 '''
 Input format: cremi challenge
 '''
+maxNumImagesToTrain = 100
 hdf5_fileName_original = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501.hdf'
 hdf5_fileName_membranes = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501_membranes.hdf'
 rawfile = CremiFile(hdf5_fileName_original, "r")
@@ -63,8 +64,11 @@ raw_ds = pygt.normalize(np.array(rawfile.read_raw().data))
 # rescale labels s.t. all non zero labels are given 1.
 label_ds = 1*(np.array(labelfile.read_neuron_ids().data)>1)
 
-#print('max label:')
-#print(np.max(label_ds))
+print('max label:')
+print(np.max(label_ds))
+print('min label:')
+print(np.min(label_ds))
+
 
 ###############################################################
 '''
@@ -105,8 +109,10 @@ print(hdf5_raw_ds.shape, hdf5_raw_ds.dtype)
 print("Stop william's log message.")
 '''
 
-#print("raw_ds.shape = {0}".format(raw_ds.shape))
-#print("hdf5_gt_ds.shape = {0}".format(gt_ds.shape))
+print("raw_ds.shape = {0}".format(raw_ds.shape))
+print("label_ds.shape = {0}".format(label_ds.shape))
+# print("hdf5_gt_ds.shape = {0}".format(gt_ds.shape))
+
 
 ###############################################################
 '''
@@ -140,18 +146,31 @@ for i in range(hdf5_raw_ds.shape[0]):
     datasets += [dataset]
 '''
 
+###############################
+# create dataset for training
+###############################
 
+print('Using {} images out of the available {} images'.format(maxNumImagesToTrain,len(raw_ds)))
 
 datasets = []
-for i in range(0,len(raw_ds)):
+for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
     dataset = {}
-    dataset['data'] = raw_ds[i]
-    dataset['label'] = label_ds[i]
+    dataset['data'] = np.expand_dims(raw_ds[i],0)
+    dataset['label'] = np.expand_dims(label_ds[i],0)
+    # dataset['data'] = raw_ds[i]
+    # dataset['label'] = label_ds[i]
     datasets += [dataset]
 
 #test_dataset = {}
 #test_dataset['data'] = hdf5_raw_ds
 #test_dataset['label'] = hdf5_aff_ds
+
+print(len(datasets)) # expected 125
+print(datasets[0]['data'].shape) # expected (1,1250,1250)
+print(datasets[0]['label'].shape) # expected (1,1250,1250)
+
+'''
+debug start
 
 # Set train options
 class TrainOptions:
@@ -192,4 +211,7 @@ if (len(solverstates) == 0 or solverstates[-1][0] < solver_config.max_iter):
     if (len(solverstates) > 0):
         solver.restore(solverstates[-1][1])
     pygt.train(solver, test_net, datasets, [], options)
+   
+debug stop    
+'''
     
