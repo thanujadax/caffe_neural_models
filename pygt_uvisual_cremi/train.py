@@ -59,7 +59,8 @@ hdf5_fileName_original = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501.h
 hdf5_fileName_membranes = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501_membranes.hdf'
 rawfile = CremiFile(hdf5_fileName_original, "r")
 labelfile = CremiFile(hdf5_fileName_membranes, "r")
-raw_ds = pygt.normalize(np.array(rawfile.read_raw().data))
+#raw_ds = pygt.normalize(np.array(rawfile.read_raw().data))
+raw_ds = pygt.normalize(np.array(rawfile.read_raw().data, dtype=float32))
 # label_ds is a np array with neuronIDs as elements. 0 is for membranes. 
 # rescale labels s.t. all non zero labels are given 1.
 label_ds = 1*(np.array(labelfile.read_neuron_ids().data)>1)
@@ -165,12 +166,9 @@ for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
 #test_dataset['data'] = hdf5_raw_ds
 #test_dataset['label'] = hdf5_aff_ds
 
-print(len(datasets)) # expected 125
-print(datasets[0]['data'].shape) # expected (1,1250,1250)
-print(datasets[0]['label'].shape) # expected (1,1250,1250)
-
-'''
-debug start
+#print(len(datasets)) # expected 125
+#print(datasets[0]['data'].shape) # expected (1,1250,1250)
+#print(datasets[0]['label'].shape) # expected (1,1250,1250)
 
 # Set train options
 class TrainOptions:
@@ -212,6 +210,4 @@ if (len(solverstates) == 0 or solverstates[-1][0] < solver_config.max_iter):
         solver.restore(solverstates[-1][1])
     pygt.train(solver, test_net, datasets, [], options)
    
-debug stop    
-'''
     
