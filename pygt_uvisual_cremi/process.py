@@ -84,7 +84,7 @@ hdf5_fileName = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501.hdf'
 file = CremiFile(hdf5_fileName, "r")
 
 # raw_ds = pygt.normalize(np.array(file.read_raw().data))
-raw_ds = pygt.normalize(np.array(rawfile.read_raw().data, dtype=float32))
+raw_ds = pygt.normalize(np.array(file.read_raw().data, dtype=float32))
 # print(raw_ds[0].shape)
 
 datasets = []
