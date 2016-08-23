@@ -166,8 +166,10 @@ for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
 '''
 
 # 3D data feeding
-datasets['data'] = np.expand_dims(raw_ds,0)
-datasets['label'] = np.expand_dims(label_ds,0)
+dataset = {}
+dataset['data'] = np.expand_dims(raw_ds,0)
+dataset['label'] = np.expand_dims(label_ds,0)
+datasets = [dataset]
 
 
 #test_dataset = {}
@@ -175,6 +177,9 @@ datasets['label'] = np.expand_dims(label_ds,0)
 #test_dataset['label'] = hdf5_aff_ds
 
 #print(len(datasets)) # expected 125
+#print(datasets[0]['data'].shape) # expected (1,1250,1250)
+#print(datasets[0]['label'].shape) # expected (1,1250,1250)
+
 #print(datasets[0]['data'].shape) # expected (1,1250,1250)
 #print(datasets[0]['label'].shape) # expected (1,1250,1250)
 
