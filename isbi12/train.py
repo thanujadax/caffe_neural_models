@@ -54,6 +54,7 @@ hdf5_gt_ds = np.asarray(hdf5_gt[hdf5_gt.keys()[0]]).astype(float32)
 '''
 Input format: cremi challenge
 '''
+'''
 maxNumImagesToTrain = 100
 hdf5_fileName_original = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501.hdf'
 hdf5_fileName_membranes = '/home/thanuja/DATA/cremi/train/hdf/sample_A_20160501_membranes.hdf'
@@ -69,29 +70,29 @@ print('max label:')
 print(np.max(label_ds))
 print('min label:')
 print(np.min(label_ds))
-
+'''
 
 ###############################################################
 '''
 Input option 2
 Load the datasets - individual tiff files in a directory
 '''
-'''
-
-rawInputDir = '/home/thanuja/projects/data/dataset_01/train/raw';
-labelInputDir = '/home/thanuja/projects/data/dataset_01/train/labels'
+maxNumImagesToTrain = 30
+rawInputDir = '/home/thanuja/DATA/ISBI2012/train-volume'
+labelInputDir = '/home/thanuja/DATA/ISBI2012/train-labels'
 
 rawImagePath = sorted(glob.glob(rawInputDir+'/*.tif'))
 print("rawImagePath: {0}".format(rawImagePath))
-labelImagePath = sorted(glob.glob(labelInputDir+'/*.png'))
+labelImagePath = sorted(glob.glob(labelInputDir+'/*.tif'))
 numFiles = len(rawImagePath)
 
-raw_ds = [np.expand_dims(pygt.normalize(np.array(Image.open(rawImagePath[i]).convert('L'), 'f')),0) for i in range(0,numFiles)]
-gt_ds = [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)]
-gt_ds_scaled = [np.expand_dims(np.floor(label/31),0) for label in gt_ds]
-print(gt_ds_scaled[0].shape)
+# raw_ds = [np.expand_dims(pygt.normalize(np.array(Image.open(rawImagePath[i]).convert('L'), 'f')),0) for i in range(0,numFiles)]
+raw_ds = [pygt.normalize(np.array(Image.open(rawImagePath[i]).convert('L'), 'f')) for i in range(0,numFiles)]
+label_ds = [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in range(0,numFiles)]
+# gt_ds_scaled = [np.expand_dims(np.floor(label/31),0) for label in gt_ds]
+print(label_ds[0].shape)
 print(raw_ds[0].shape)
-'''
+
 
 '''
 print("os.listdir(rawInputDir):{0}".format(os.listdir(rawInputDir)))
@@ -109,11 +110,11 @@ hdf5_raw_ds = np.array(raw_arrays)
 print(hdf5_raw_ds.shape, hdf5_raw_ds.dtype)
 print("Stop william's log message.")
 '''
-
+'''
 print("raw_ds.shape = {0}".format(raw_ds.shape))
 print("label_ds.shape = {0}".format(label_ds.shape))
 # print("hdf5_gt_ds.shape = {0}".format(gt_ds.shape))
-
+'''
 
 ###############################################################
 '''
@@ -121,8 +122,8 @@ Input option 3
 Load the datasets - multipage tiff containing all the images
 '''
 '''
-tiff_raw_dir = ''
-tiff_gt_dir = ''
+tiff_raw_dir = '/home/thanuja/DATA/ISBI2012/train-volume/'
+tiff_gt_dir = '/home/thanuja/DATA/ISBI2012/train-labels/'
 # ignore for eucledian distance
 tiff_aff_file = ''
 # read all files into 3D numpy arrays
@@ -153,8 +154,6 @@ for i in range(hdf5_raw_ds.shape[0]):
 
 print('Using {} images out of the available {} images'.format(maxNumImagesToTrain,len(raw_ds)))
 
-'''
-# 2D data feeding
 datasets = []
 for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
     dataset = {}
@@ -163,25 +162,14 @@ for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
     # dataset['data'] = raw_ds[i]
     # dataset['label'] = label_ds[i]
     datasets += [dataset]
-'''
-
-# 3D data feeding
-dataset = {}
-dataset['data'] = np.expand_dims(raw_ds,0)
-dataset['label'] = np.expand_dims(label_ds,0)
-datasets = [dataset]
-
 
 #test_dataset = {}
 #test_dataset['data'] = hdf5_raw_ds
 #test_dataset['label'] = hdf5_aff_ds
 
-#print(len(datasets)) # expected 125
-#print(datasets[0]['data'].shape) # expected (1,1250,1250)
-#print(datasets[0]['label'].shape) # expected (1,1250,1250)
-
-#print(datasets[0]['data'].shape) # expected (1,1250,1250)
-#print(datasets[0]['label'].shape) # expected (1,1250,1250)
+print(len(datasets)) # expected 30
+print(datasets[0]['data'].shape) # expected (1,512,512)
+print(datasets[0]['label'].shape) # expected (1,512,512)
 
 # Set train options
 class TrainOptions:
@@ -223,4 +211,3 @@ if (len(solverstates) == 0 or solverstates[-1][0] < solver_config.max_iter):
         solver.restore(solverstates[-1][1])
     pygt.train(solver, test_net, datasets, [], options)
    
-    

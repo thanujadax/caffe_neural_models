@@ -41,7 +41,7 @@ netconf.u_netconfs[0].unet_downsampling_strategy = [[2],[2],[2],[2]]
 
 
 netconf.loss_function = "softmax"
-inshape,outshape,fmaps = pygt.netgen.compute_valid_io_shapes(netconf,pygt.netgen.caffe_pb2.TRAIN,[400,400],[500,500],constraints=[None,lambda x: x[0], lambda x: x[1]])
+inshape,outshape,fmaps = pygt.netgen.compute_valid_io_shapes(netconf,pygt.netgen.caffe_pb2.TRAIN,[40,40],[200,200],constraints=[None,lambda x: x[0], lambda x: x[1]])
 
 
 # We choose the maximum that still gives us 20 fmaps:
