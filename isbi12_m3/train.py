@@ -5,6 +5,7 @@ from numpy import float32, int32, uint8, dtype
 import sys
 from PIL import Image
 import glob
+import pims
 
 from cremi import Annotations, Volume
 from cremi.io import CremiFile
@@ -77,6 +78,7 @@ print(np.min(label_ds))
 Input option 2
 Load the datasets - individual tiff files in a directory
 '''
+'''
 maxNumImagesToTrain = 30
 rawInputDir = '/home/thanuja/DATA/ISBI2012/train-volume'
 labelInputDir = '/home/thanuja/DATA/ISBI2012/train-labels'
@@ -93,6 +95,11 @@ label_ds = [np.array(Image.open(labelImagePath[i]).convert('L'), 'f') for i in r
 print(label_ds[0].shape)
 print(raw_ds[0].shape)
 
+print(np.maximum(raw_ds[0]))
+print(np.minimum(raw_ds[0]))
+print(np.maximum(label_ds[0]))
+print(np.minimum(label_ds[0]))
+'''
 
 '''
 print("os.listdir(rawInputDir):{0}".format(os.listdir(rawInputDir)))
@@ -121,19 +128,37 @@ print("label_ds.shape = {0}".format(label_ds.shape))
 Input option 3
 Load the datasets - multipage tiff containing all the images
 '''
-'''
-tiff_raw_dir = '/home/thanuja/DATA/ISBI2012/train-volume/'
-tiff_gt_dir = '/home/thanuja/DATA/ISBI2012/train-labels/'
-# ignore for eucledian distance
-tiff_aff_file = ''
-# read all files into 3D numpy arrays
-tiff_raw = Image.open(tiff_raw_file)
-tiff_gt = Image.open(tiff_gt_file)
-tiff_aff = Image.open(tiff_aff_file)
-# read into np arrays
-# tiff
-'''
-###############################################################
+numImagesInTiff = 30
+maxNumImagesToTrain = numImagesInTiff
+rawInputFile = '/home/thanuja/DATA/ISBI2012/train-volume.tif'
+labelInputFile = '/home/thanuja/DATA/ISBI2012/train-labels.tif'
+
+# raw_ds = [np.expand_dims(pygt.normalize(np.array(Image.open(rawInputFile).convert('L'), 'f')),0) for i in range(0,numImagesInTiff)]
+# label_ds = [np.expand_dims(np.ceil((np.array(Image.open(labelInputFile).convert('L'), 'f'))/255),0) for i in range(0,numImagesInTiff)]
+raw_stack = np.array(pims.TiffStack(rawInputFile))
+label_stack = np.ceil(np.array(pims.TiffStack(labelInputFile))/255)
+
+raw_ds = [np.expand_dims(pygt.normalize(raw_stack[i]),0) for i in range(0,len(raw_stack))]
+label_ds = [np.expand_dims(label_stack[i],0) for i in range(0,len(label_stack))]
+
+# raw_stack = npims.TiffStack(rawInputFile)
+# label_stack = pims.TiffStack(labelInputFile)
+
+
+
+print("len(raw_ds): " + str(len(raw_ds)))
+print("len(label_ds): " + str(len(label_ds)))
+
+print("raw_ds[0].shape: " + str(raw_ds[0].shape))
+# print(len(raw_ds))
+print("label_ds[0].shape: " + str(label_ds[0].shape))
+# print(len(label_ds))
+
+print("raw max: " + str(np.amax(raw_ds[0])))
+print("raw min: " + str(np.amin(raw_ds[0])))
+print("label max: " + str(np.amax(label_ds[0])))
+print("label min: " + str(np.amin(label_ds[0])))
+###################################################
 '''
 datasets = []
 # for i in range(hdf5_raw_ds.shape[1]):
@@ -157,10 +182,10 @@ print('Using {} images out of the available {} images'.format(maxNumImagesToTrai
 datasets = []
 for i in range(0,min(len(raw_ds),maxNumImagesToTrain)):
     dataset = {}
-    dataset['data'] = np.expand_dims(raw_ds[i],0)
-    dataset['label'] = np.expand_dims(label_ds[i],0)
-    # dataset['data'] = raw_ds[i]
-    # dataset['label'] = label_ds[i]
+    # dataset['data'] = np.expand_dims(raw_ds[i],0)
+    # dataset['label'] = np.expand_dims(label_ds[i],0)
+    dataset['data'] = raw_ds[i]
+    dataset['label'] = label_ds[i]
     datasets += [dataset]
 
 #test_dataset = {}
@@ -210,4 +235,4 @@ if (len(solverstates) == 0 or solverstates[-1][0] < solver_config.max_iter):
     if (len(solverstates) > 0):
         solver.restore(solverstates[-1][1])
     pygt.train(solver, test_net, datasets, [], options)
-   
+

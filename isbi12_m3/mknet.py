@@ -32,7 +32,7 @@ netconf.fmap_start = 64
 #sk2.sknet_padding = [44,44]
 #sk2.sknet_conv = [[6],[4],[2]]
 
-netconf.u_netconfs[0].unet_depth = 4
+netconf.u_netconfs[0].unet_depth = 3
 netconf.u_netconfs[0].unet_fmap_inc_rule = lambda fmaps: int(math.ceil(float(fmaps) * 2))
 netconf.u_netconfs[0].unet_fmap_dec_rule = lambda fmaps: int(math.ceil(float(fmaps) / 2))
 netconf.u_netconfs[0].unet_downsampling_strategy = [[2],[2],[2],[2]]
