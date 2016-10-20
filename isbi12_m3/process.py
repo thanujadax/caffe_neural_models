@@ -72,8 +72,11 @@ raw_ds = [np.expand_dims(pygt.normalize(raw_stack[i]),0) for i in range(0,len(ra
 # gt_ds_scaled = [np.expand_dims(np.floor(label/31),0) for label in gt_ds]
 
 # print(raw_ds.shape)
-print(raw_ds[0].shape)
-print(len(raw_ds))
+print("raw_ds[0].shape: " + str(raw_ds[0].shape))
+print("len(raw_ds): " + str(len(raw_ds)))
+
+print("raw max: " + str(np.amax(raw_ds[0])))
+print("raw min: " + str(np.amin(raw_ds[0])))
 '''
 im = Image.open(rawInputFile)
 imarray = np.array(im)
@@ -104,10 +107,10 @@ for i in range(0,len(raw_ds)):
     # dataset['label'] = gt_ds_scaled[i]
     datasets += [dataset]
 
-print(len(datasets)) # expected 125
-print(datasets[0]['data'].shape) # expected (1,1250,1250)
+print("len(datasets): " + str(len(datasets))) # expected 125
+print("datasets[0]['data'].shape: " + str(datasets[0]['data'].shape)) # expected (1,1250,1250)
 
-
+'''
 pred_array = pygt.process(test_net, datasets)
 
 #pygt.dump_tikzgraph_maps(test_net, 'dump')
@@ -115,4 +118,4 @@ pred_array = pygt.process(test_net, datasets)
 outhdf5 = h5py.File('isbi-test.h5', 'w')
 outdset = outhdf5.create_dataset('main', np.shape(pred_array), np.float32, data=pred_array)
 outhdf5.close()
-
+'''
